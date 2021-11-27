@@ -1,17 +1,21 @@
 import json
 import sqlite3
 import hashlib
+import uuid
 
 class LoginDatabase():
     def __init__(self):
         self.conn = sqlite3.connect('login.db')
         self.c = self.conn.cursor()
         self.c.execute('''CREATE TABLE IF NOT EXISTS test
-             (id INTEGER PRIMARY KEY, email text, hash text)''')
+             (id INTEGER PRIMARY KEY,uuid text, email text, hash text)''')
 
     def insert(self, email, hash):
+        # generate a random uuid
+        uuid_id = str(uuid.uuid4())
         # get the hash of the password
-        self.c.execute("INSERT INTO test (email, hash) VALUES (?, ?)", (email, hash))
+        self.c.execute("INSERT INTO test (uuid, email, hash) VALUES (?, ?, ?)", (uuid_id, email, hash))
+        self.conn.commit()
 
     def delete(self, id):
         self.c.execute("DELETE FROM test WHERE id=?", (id,))
