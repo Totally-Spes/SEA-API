@@ -2,16 +2,15 @@ import json
 import sqlite3
 import hashlib
 
-class Login():
+class LoginDatabase():
     def __init__(self):
         self.conn = sqlite3.connect('login.db')
         self.c = self.conn.cursor()
         self.c.execute('''CREATE TABLE IF NOT EXISTS test
              (id INTEGER PRIMARY KEY, email text, hash text)''')
 
-    def insert(self, email, password):
+    def insert(self, email, hash):
         # get the hash of the password
-        hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
         self.c.execute("INSERT INTO test (email, hash) VALUES (?, ?)", (email, hash))
 
     def delete(self, id):

@@ -7,16 +7,25 @@ from flask import Flask, request, jsonify
 class API:
     def __init__(self, app: Flask):
         self.app = app
+        self.app.add_url_rule('/', 'root', self.__index)
         self.app.add_url_rule('/api', 'index', self.__index)
         self.app.add_url_rule('/api/location/get/<latitude>/<longitude>/<radius>', 'getlocation', self.__get_location)
         self.app.add_url_rule('/api/location/get/<latitude>/<longitude>', 'getlocation', self.__get_location)
         self.app.add_url_rule('/api/location/set/<latitude>/<longitude>/<amount>', 'setlocation', self.__set_location)
 
         # gestion of the login data
-        self.app.add_url_rule('/api/login/<username>/<password>', 'login', self.__login)
+        self.app.add_url_rule('/api/account/login/<username>/<hash>', 'login', self.__login)
+        self.app.add_url_rule('/api/account/add/<username>/<hash>', 'add-user', self.__add_user)
 
     def __index(self):
         return 'Hello, World!'
+
+    def __add_user(self, username, hash):
+        db = login.LoginDatabase()
+        db.insert(username, hash)
+
+
+        return "OK"
 
     def __get_location(self, latitude, longitude, radius=10):
         db = location_db.LocationDatabase()
