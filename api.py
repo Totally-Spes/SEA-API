@@ -2,7 +2,8 @@ import datetime
 from datetime import timezone
 import location_db
 import login
-from flask import Flask, request, jsonify
+import json
+from flask import Flask, request, jsonify, make_response
 
 class API:
     def __init__(self, app: Flask):
@@ -16,7 +17,7 @@ class API:
         # gestion of the login data
         self.app.add_url_rule('/api/account/login/<username>/<hash>', 'login', self.__login)
         self.app.add_url_rule('/api/account/add/<username>/<hash>', 'add-user', self.__add_user)
-        self.app.add_url_rule('/api/account/check/<username>', 'check-user', self.__check_user)
+        self.app.add_url_rule('/api/account/del/<username>', 'del-user', self.__del_user)
         self.app.add_url_rule('/api/account/edit/<username>/<hash>', 'edit-user', self.__edit_user)
 
     def __index(self):
@@ -25,7 +26,8 @@ class API:
         db = login.LoginDatabase()
         if not db.check_user(username):
             return "User does not exist"
-        return jsonify(db.check_user(username))
+        return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+        
     
     def __edit_user(self, username, hash):
         db = login.LoginDatabase()
@@ -33,16 +35,22 @@ class API:
             return "User does not exist"
 
         db.edit(username, hash)
-        return "OK"
+        return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
-    
+    def __del_user(self, username):
+        db = login.LoginDatabase()
+        if not db.check_user(username):
+            return "User does not exist"
+        db.delete(username)
+        return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
     def __add_user(self, username, hash):
         db = login.LoginDatabase()
         if db.check_user(username):
             return "User already exists"
 
         db.insert(username, hash)
-        return "OK"
+        return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
     def __get_location(self, latitude, longitude, radius=10):
         db = location_db.LocationDatabase()
@@ -77,11 +85,11 @@ class API:
         date = datetime.datetime.now(timezone.utc).timestamp()
         db.insert(date, latitude, longitude, amount)
 
-        return "OK"
+        return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
-    def __login(self, username, password):
+    def __login(self, username, hash):
         db = login.LoginDatabase()
-        return jsonify(db.login(username, password))
+        return jsonify(db.login(username, hash))
 
     def run(self, port):
         self.app.run(debug=True, port=port)
