@@ -16,15 +16,32 @@ class API:
         # gestion of the login data
         self.app.add_url_rule('/api/account/login/<username>/<hash>', 'login', self.__login)
         self.app.add_url_rule('/api/account/add/<username>/<hash>', 'add-user', self.__add_user)
+        self.app.add_url_rule('/api/account/check/<username>', 'check-user', self.__check_user)
+        self.app.add_url_rule('/api/account/edit/<username>/<hash>', 'edit-user', self.__edit_user)
 
     def __index(self):
         return 'Hello, World!'
+    def __check_user(self, username):
+        db = login.LoginDatabase()
+        if not db.check_user(username):
+            return "User does not exist"
+        return jsonify(db.check_user(username))
+    
+    def __edit_user(self, username, hash):
+        db = login.LoginDatabase()
+        if not db.check_user(username):
+            return "User does not exist"
 
+        db.edit(username, hash)
+        return "OK"
+
+    
     def __add_user(self, username, hash):
         db = login.LoginDatabase()
+        if db.check_user(username):
+            return "User already exists"
+
         db.insert(username, hash)
-
-
         return "OK"
 
     def __get_location(self, latitude, longitude, radius=10):

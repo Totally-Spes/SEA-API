@@ -21,18 +21,24 @@ class LoginDatabase():
         self.c.execute("DELETE FROM test WHERE id=?", (id,))
         self.conn.commit()
 
-    def fetch(self):
-        self.c.execute("SELECT * FROM test")
-        rows = self.c.fetchall()
-        return rows
+    def edit(self, email, hash):
+        self.c.execute("UPDATE test SET hash=? WHERE email=?", (hash, email))
+        self.conn.commit()
+
 
     def close(self):
         self.conn.close()
 
-    def login(self, email, password):
-        # get the hash of the password
-        hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    def login(self, email, hash):
         self.c.execute("SELECT * FROM test WHERE email=? AND hash=?", (email, hash))
+        rows = self.c.fetchall()
+        if rows:
+            return True
+        else:
+            return False
+
+    def check_user(self, email):
+        self.c.execute("SELECT * FROM test WHERE email=?", (email,))
         rows = self.c.fetchall()
         if rows:
             return True
