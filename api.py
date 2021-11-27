@@ -40,7 +40,8 @@ class API:
         step = 1
 
         found = False
-        cur_lat, cur_long = None, None
+
+        L = []
 
         for lat in range (lat_min, lat_max, step):
             for long in range(long_min, long_max, step):
@@ -50,13 +51,9 @@ class API:
                         found = True
                         break
                 if not found:
-                    break
-            if not found:
-                break
+                    L.append((lat, long))
 
-        ret = { cur_lat, cur_long }
-
-        return jsonify(ret)
+        return jsonify(L)
 
     def __set_location(self, latitude, longitude, amount):
         db = location_db.LocationDatabase()
