@@ -18,10 +18,10 @@ class LocationDatabase:
         return rows
 
     def fetch_locations(self, latitude, longitude, radius):
-        lat_min = int(latitude) - int(radius) / 2
-        lat_max = int(latitude) + int(radius) / 2
-        long_min = int(longitude) - int(radius) / 2
-        long_max = int(longitude) + int(radius) / 2
+        lat_min = int(latitude) - int(radius)
+        lat_max = int(latitude) + int(radius)
+        long_min = int(longitude) - int(radius)
+        long_max = int(longitude) + int(radius)
         cond = 'latitude > ' + str(lat_min) + ' AND latitude < ' + str(lat_max) + \
         ' AND longitude > ' + str(long_min) + ' AND longitude < ' + str(long_max)
         print(cond)

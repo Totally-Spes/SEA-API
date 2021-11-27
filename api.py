@@ -24,7 +24,30 @@ class API:
 
         locations = db.fetch_locations(latitude, longitude, radius)
 
-        return jsonify(locations)
+        lat_min = int(latitude) - int(radius)
+        lat_max = int(latitude) + int(radius)
+        long_min = int(longitude) - int(radius)
+        long_max = int(longitude) + int(radius)
+        step = 1
+
+        found = False
+        cur_lat, cur_long = None, None
+
+        for lat in range (lat_min, lat_max, step):
+            for long in range(long_min, long_max, step):
+                found = False
+                for _, _, cur_lat, cur_long, _ in locations:
+                    if lat == cur_lat and long == cur_long:
+                        found = True
+                        break
+                if not found:
+                    break
+            if not found:
+                break
+
+        ret = { cur_lat, cur_long }
+
+        return jsonify(ret)
 
     def __set_location(self, latitude, longitude, amount):
         db = location_db.LocationDatabase()
@@ -37,6 +60,6 @@ class API:
         db = login.LoginDatabase()
         return jsonify(db.login(username, password))
 
-    def run(self):
-        self.app.run(debug=True)
+    def run(self, port):
+        self.app.run(debug=True, port=port)
 
