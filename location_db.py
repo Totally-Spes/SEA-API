@@ -6,10 +6,10 @@ class LocationDatabase:
         self.conn = sqlite3.connect('location.db')
         self.c = self.conn.cursor()
         self.c.execute('''CREATE TABLE IF NOT EXISTS test
-             (id INTEGER PRIMARY KEY, date text, latitude real, longitude real, amount real)''')
+             (id INTEGER PRIMARY KEY, date text, lat1 real, long1 real, lat2 real, long2 real, amount real)''')
 
-    def insert(self, date, latitude, longitude, amount):
-        self.c.execute("INSERT INTO test VALUES (NULL, ?, ?, ?, ?)", (date, latitude, longitude, amount))
+    def insert(self, date, lat1, long1, lat2, long2, amount):
+        self.c.execute("INSERT INTO test VALUES (NULL, ?, ?, ?, ?, ?, ?)", (date, lat1, long1, lat2, long2, amount))
         self.conn.commit()
 
     def fetch(self):

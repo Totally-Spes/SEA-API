@@ -10,9 +10,8 @@ class API:
         self.app = app
         self.app.add_url_rule('/', 'root', self.__index)
         self.app.add_url_rule('/api', 'index', self.__index)
-        self.app.add_url_rule('/api/location/get/<latitude>/<longitude>/<radius>', 'getlocation', self.__get_location)
-        self.app.add_url_rule('/api/location/get/<latitude>/<longitude>', 'getlocation', self.__get_location)
-        self.app.add_url_rule('/api/location/set/<latitude>/<longitude>/<amount>', 'setlocation', self.__set_location)
+        self.app.add_url_rule('/api/location/setbox/<lat1>/<long1>/<lat2>/<long2>/<amount>', 'setbox', self.__set_box)
+        self.app.add_url_rule('/api/location/getbox', 'getbox', self.__get_box)
 
         # gestion of the login data
         self.app.add_url_rule('/api/account/login/<username>/<hash>', 'login', self.__login)
@@ -22,13 +21,14 @@ class API:
 
     def __index(self):
         return 'Hello, World!'
+
     def __check_user(self, username):
         db = login.LoginDatabase()
         if not db.check_user(username):
             return "User does not exist"
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
-        
-    
+
+
     def __edit_user(self, username, hash):
         db = login.LoginDatabase()
         if not db.check_user(username):
@@ -52,38 +52,19 @@ class API:
         db.insert(username, hash)
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
-    def __get_location(self, latitude, longitude, radius=10):
+    def __get_box(self):
         db = location_db.LocationDatabase()
-        date = datetime.datetime.now(timezone.utc).timestamp()
+        return jsonify(db.fetch())
 
-        locations = db.fetch_locations(latitude, longitude, radius)
-
-        lat_min = int(latitude) - int(radius)
-        lat_max = int(latitude) + int(radius)
-        long_min = int(longitude) - int(radius)
-        long_max = int(longitude) + int(radius)
-        step = 1
-
-        found = False
-
-        L = []
-
-        for lat in range (lat_min, lat_max, step):
-            for long in range(long_min, long_max, step):
-                found = False
-                for _, _, cur_lat, cur_long, _ in locations:
-                    if lat == cur_lat and long == cur_long:
-                        found = True
-                        break
-                if not found:
-                    L.append((lat, long))
-
-        return jsonify(L)
-
-    def __set_location(self, latitude, longitude, amount):
+    def __set_box(self, lat1, long1, lat2, long2, amount):
         db = location_db.LocationDatabase()
+        boxes = db.fetch()
+        for box in boxes:
+            if str(box[2]) == lat1 and str(box[3]) == long1 and str(box[4]) == lat2 and str(box[5]) == long2:
+                return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
         date = datetime.datetime.now(timezone.utc).timestamp()
-        db.insert(date, latitude, longitude, amount)
+        db.insert(date, lat1, long1, lat2, long2, amount)
 
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
