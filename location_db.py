@@ -1,6 +1,5 @@
 import json
 import sqlite3
-database_path = "test.json"
 
 class LocationDatabase:
     def __init__(self):
@@ -15,6 +14,18 @@ class LocationDatabase:
 
     def fetch(self):
         self.c.execute("SELECT * FROM test")
+        rows = self.c.fetchall()
+        return rows
+
+    def fetch_locations(self, latitude, longitude, radius):
+        lat_min = int(latitude) - int(radius) / 2
+        lat_max = int(latitude) + int(radius) / 2
+        long_min = int(longitude) - int(radius) / 2
+        long_max = int(longitude) + int(radius) / 2
+        cond = 'latitude > ' + str(lat_min) + ' AND latitude < ' + str(lat_max) + \
+        ' AND longitude > ' + str(long_min) + ' AND longitude < ' + str(long_max)
+        print(cond)
+        self.c.execute('SELECT * FROM test WHERE (' + cond + ')')
         rows = self.c.fetchall()
         return rows
 
