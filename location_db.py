@@ -22,8 +22,8 @@ class LocationDatabase:
         lat_max = int(latitude) + int(radius)
         long_min = int(longitude) - int(radius)
         long_max = int(longitude) + int(radius)
-        cond = 'latitude > ' + str(lat_min) + ' AND latitude < ' + str(lat_max) + \
-        ' AND longitude > ' + str(long_min) + ' AND longitude < ' + str(long_max)
+        cond = 'latitude >= ' + str(lat_min) + ' AND latitude <= ' + str(lat_max) + \
+        ' AND longitude >= ' + str(long_min) + ' AND longitude <= ' + str(long_max)
         print(cond)
         self.c.execute('SELECT * FROM test WHERE (' + cond + ')')
         rows = self.c.fetchall()
