@@ -78,10 +78,12 @@ class API:
     def __add_user(self, username, hash,type_peche):
         db = login.LoginDatabase()
         if db.check_user(username):
-            return json.dumps({'success':False}), 409, {'ContentType':'application/json'}
+            resp = json.dumps({'success':False}), 409, {'ContentType':'application/json',"Access-Control-Allow-Origin": "*"}
+        else:
+            db.insert(username, hash,type_peche)
+            resp = json.dumps({'success':True}), 200, {'ContentType':'application/json',"Access-Control-Allow-Origin": "*"}
+        return resp
 
-        db.insert(username, hash,type_peche)
-        return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
     @clear_old
     def __get_box(self):
@@ -98,8 +100,8 @@ class API:
         for i in range(len(boxes)):
             box = boxes[i]
             if str(box[2]) == lat1 and str(box[3]) == long1 and str(box[4]) == lat2 and str(box[5]) == long2: # if the box is already in the database
-                if box[1] != date:
-                    db.updateAmount(i,box[6] + int(amount),date)
+                # if box[1] != date:
+                db.updateAmount(box[0],int(amount),date)
                 
                 return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
