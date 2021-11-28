@@ -5,6 +5,16 @@ import login
 import json
 from flask import Flask, request, jsonify, make_response
 
+def clear_old(function):
+    """
+    Clears old entries from the database.
+    """
+    db = location_db.LocationDatabase()
+    db.remove_old_data()
+
+    return function
+
+
 class API:
     def __init__(self, app: Flask):
         self.app = app
@@ -22,12 +32,13 @@ class API:
     def __index(self):
         return 'Hello, World!'
 
+    @clear_old
     def __check_user(self, username):
         db = login.LoginDatabase()
         if not db.check_user(username):
             return "User does not exist"
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
-
+    @clear_old
     def __check_hash(self, username, hash):
         db = login.LoginDatabase()
         if db.check_user(username):
@@ -46,6 +57,7 @@ class API:
         db.edit(username, hash)
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
+    @clear_old
     def __del_user(self, username):
         db = login.LoginDatabase()
         if not db.check_user(username):
@@ -53,6 +65,7 @@ class API:
         db.delete(username)
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
+    @clear_old
     def __add_user(self, username, hash):
         db = login.LoginDatabase()
         if db.check_user(username):
@@ -61,12 +74,14 @@ class API:
         db.insert(username, hash)
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
+    @clear_old
     def __get_box(self):
         db = location_db.LocationDatabase()
         resp = jsonify(db.fetch())
         resp.headers.add("Access-Control-Allow-Origin", "*")
         return resp
 
+    @clear_old
     def __set_box(self, lat1, long1, lat2, long2, amount):
         db = location_db.LocationDatabase()
         boxes = db.fetch()
@@ -79,6 +94,7 @@ class API:
 
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
+    @clear_old
     def __login(self, username, hash):
         db = login.LoginDatabase()
         if db.check_user(username):
