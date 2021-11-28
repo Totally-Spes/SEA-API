@@ -26,7 +26,7 @@ class API:
 
         # gestion of the login data
         self.app.add_url_rule('/api/account/login/<username>/<hash>', 'login', self.__login)
-        self.app.add_url_rule('/api/account/add/<username>/<hash>/<type_peche>', 'add-user', self.__add_user)
+        self.app.add_url_rule('/api/account/add/<username>/<hash>/<type_peche>', 'adduser', self.__add_user)
         self.app.add_url_rule('/api/account/del/<username>', 'del-user', self.__del_user)
         self.app.add_url_rule('/api/account/edit/<username>/<hash>', 'edit-user', self.__edit_user)
 
@@ -75,17 +75,6 @@ class API:
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
     @clear_old
-    def __add_user(self, username, hash,type_peche):
-        db = login.LoginDatabase()
-        if db.check_user(username):
-            resp = json.dumps({'success':False}), 409, {'ContentType':'application/json',"Access-Control-Allow-Origin": "*"}
-        else:
-            db.insert(username, hash,type_peche)
-            resp = json.dumps({'success':True}), 200, {'ContentType':'application/json',"Access-Control-Allow-Origin": "*"}
-        return resp
-
-
-    @clear_old
     def __get_box(self):
         db = location_db.LocationDatabase()
         resp = jsonify(db.fetch())
@@ -122,7 +111,17 @@ class API:
         else:
             resp = json.dumps({'success':False}), 300, {'ContentType':'application/json',"Access-Control-Allow-Origin": "*"}
         return resp
-        
+    
+    @clear_old
+    def __add_user(self, username, hash,type_peche):
+        db = login.LoginDatabase()
+        if db.check_user(username):
+            resp = json.dumps({'success':False}), 409, {'ContentType':'application/json','Access-Control-Allow-Origin': '*'}
+        else:
+            db.insert(username, hash,type_peche)
+            # resp = json.dumps({'success':True}), 200, {'ContentType':'application/json','Access-Control-Allow-Origin': '*'}
+            resp = json.dumps({'success':True}), 200, {'ContentType':'application/json',"Access-Control-Allow-Origin": "*"}
+        return resp
     
     def run(self, port):
         self.app.run(debug=True, port=port)
