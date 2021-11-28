@@ -21,6 +21,7 @@ class API:
         self.app.add_url_rule('/', 'root', self.__index)
         self.app.add_url_rule('/api', 'index', self.__index)
         self.app.add_url_rule('/api/location/setbox/<lat1>/<long1>/<lat2>/<long2>/<amount>', 'setbox', self.__set_box)
+        self.app.add_url_rule('/api/location/getbox-1/<lat1>/<long1>/<lat2>/<long2>', 'getbox-1', self.__get_box_1)
         self.app.add_url_rule('/api/location/getbox', 'getbox', self.__get_box)
 
         # gestion of the login data
@@ -31,6 +32,13 @@ class API:
 
     def __index(self):
         return 'Hello, World!'
+
+    @clear_old
+    def __get_box_1(self, lat1, long1, lat2, long2):
+        db = location_db.LocationDatabase()
+        resp = jsonify(db.get(lat1, long1, lat2, long2))
+        resp.headers.add("Access-Control-Allow-Origin", "*")
+        return resp
 
     @clear_old
     def __check_user(self, username):
