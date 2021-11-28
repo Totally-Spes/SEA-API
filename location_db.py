@@ -17,7 +17,7 @@ class LocationDatabase:
         rows = self.c.fetchall()
         return rows
 
-    def get(lat1, long1, lat2, long2):
+    def get(self, lat1, long1, lat2, long2):
         # get the amount of water in a specific location
         self.c.execute("SELECT amount FROM test WHERE lat1 = ? AND long1 = ? AND lat2 = ? AND long2 = ?", (lat1, long1, lat2, long2))
         rows = self.c.fetchall()
@@ -47,6 +47,6 @@ class LocationDatabase:
         self.c.execute("UPDATE test SET amount = ?, date = ? WHERE id = ?", (amount, timestamp, id))
         self.conn.commit()
 
-        
+
     def close(self):
         self.conn.close()

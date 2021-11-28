@@ -21,12 +21,12 @@ class API:
         self.app.add_url_rule('/', 'root', self.__index)
         self.app.add_url_rule('/api', 'index', self.__index)
         self.app.add_url_rule('/api/location/setbox/<lat1>/<long1>/<lat2>/<long2>/<amount>', 'setbox', self.__set_box)
-        self.app.add_url_rule('/api/location/getbox-1/<lat1>/<long1>/<lat2>/<long2>', 'getbox-1', self.__get_box_1)
+        self.app.add_url_rule('/api/location/getbox1/<lat1>/<long1>/<lat2>/<long2>', 'getbox1', self.__get_box_1)
         self.app.add_url_rule('/api/location/getbox', 'getbox', self.__get_box)
 
         # gestion of the login data
         self.app.add_url_rule('/api/account/login/<username>/<hash>', 'login', self.__login)
-        self.app.add_url_rule('/api/account/add/<username>/<hash>', 'add-user', self.__add_user)
+        self.app.add_url_rule('/api/account/add/<username>/<hash>/<type_peche>', 'add-user', self.__add_user)
         self.app.add_url_rule('/api/account/del/<username>', 'del-user', self.__del_user)
         self.app.add_url_rule('/api/account/edit/<username>/<hash>', 'edit-user', self.__edit_user)
 
@@ -46,6 +46,7 @@ class API:
         if not db.check_user(username):
             return "User does not exist"
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
     @clear_old
     def __check_hash(self, username, hash):
         db = login.LoginDatabase()
@@ -56,7 +57,7 @@ class API:
                 return False
         return False
         
-
+    @clear_old
     def __edit_user(self, username, hash):
         db = login.LoginDatabase()
         if not db.check_user(username):
@@ -74,12 +75,12 @@ class API:
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
     @clear_old
-    def __add_user(self, username, hash):
+    def __add_user(self, username, hash,type_peche):
         db = login.LoginDatabase()
         if db.check_user(username):
-            return "User already exists"
+            return json.dumps({'success':False}), 409, {'ContentType':'application/json'}
 
-        db.insert(username, hash)
+        db.insert(username, hash,type_peche)
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
     @clear_old
@@ -120,7 +121,7 @@ class API:
             resp = json.dumps({'success':False}), 300, {'ContentType':'application/json',"Access-Control-Allow-Origin": "*"}
         return resp
         
-
+    
     def run(self, port):
         self.app.run(debug=True, port=port)
 

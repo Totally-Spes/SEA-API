@@ -8,13 +8,13 @@ class LoginDatabase():
         self.conn = sqlite3.connect('login.db')
         self.c = self.conn.cursor()
         self.c.execute('''CREATE TABLE IF NOT EXISTS test
-             (id INTEGER PRIMARY KEY,uuid text, email text, hash text)''')
+             (id INTEGER PRIMARY KEY,uuid text, email text, hash text,type_peche text)''')
 
-    def insert(self, email, hash):
+    def insert(self, email, hash,type_peche):
         # generate a random uuid
         uuid_id = str(uuid.uuid4())
         # get the hash of the password
-        self.c.execute("INSERT INTO test (uuid, email, hash) VALUES (?, ?, ?)", (uuid_id, email, hash))
+        self.c.execute("INSERT INTO test (uuid, email, hash, type_peche) VALUES (?, ?, ?, ?)", (uuid_id, email, hash,type_peche))
         self.conn.commit()
 
     def delete(self, id):
@@ -44,7 +44,14 @@ class LoginDatabase():
             return True
         else:
             return False
-        
+    
+    def get_boat_type(self,uuid):
+        self.c.execute("SELECT * FROM test WHERE uuid=?", (uuid,))
+        rows = self.c.fetchall()
+        if len(rows) > 0: 
+            return rows[0][4]
+        else: 
+            return None
         
     def check_hash(self, email, hash):
         self.c.execute("SELECT * FROM test WHERE email=?", (email,))
