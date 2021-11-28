@@ -21,6 +21,7 @@ class API:
         self.app.add_url_rule('/', 'root', self.__index)
         self.app.add_url_rule('/api', 'index', self.__index)
         self.app.add_url_rule('/api/location/setbox/<lat1>/<long1>/<lat2>/<long2>/<amount>', 'setbox', self.__set_box)
+        self.app.add_url_rule('/api/location/getbox-1/<lat1>/<long1>/<lat2>/<long2>', 'getbox-1', self.__get_box_1)
         self.app.add_url_rule('/api/location/getbox', 'getbox', self.__get_box)
 
         # gestion of the login data
@@ -31,6 +32,13 @@ class API:
 
     def __index(self):
         return 'Hello, World!'
+
+    @clear_old
+    def __get_box_1(self, lat1, long1, lat2, long2):
+        db = location_db.LocationDatabase()
+        resp = jsonify(db.get(lat1, long1, lat2, long2))
+        resp.headers.add("Access-Control-Allow-Origin", "*")
+        return resp
 
     @clear_old
     def __check_user(self, username):
@@ -84,12 +92,17 @@ class API:
     @clear_old
     def __set_box(self, lat1, long1, lat2, long2, amount):
         db = location_db.LocationDatabase()
+        date = datetime.datetime.now(timezone.utc).timestamp()
         boxes = db.fetch()
-        for box in boxes:
-            if str(box[2]) == lat1 and str(box[3]) == long1 and str(box[4]) == lat2 and str(box[5]) == long2:
+        for i in range(len(boxes)):
+            box = boxes[i]
+            if str(box[2]) == lat1 and str(box[3]) == long1 and str(box[4]) == lat2 and str(box[5]) == long2: # if the box is already in the database
+                if box[1] != date:
+                    db.updateAmount(i,box[6] + int(amount),date)
+                
                 return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
-        date = datetime.datetime.now(timezone.utc).timestamp()
+   
         db.insert(date, lat1, long1, lat2, long2, amount)
 
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}

@@ -17,6 +17,12 @@ class LocationDatabase:
         rows = self.c.fetchall()
         return rows
 
+    def get(lat1, long1, lat2, long2):
+        # get the amount of water in a specific location
+        self.c.execute("SELECT amount FROM test WHERE lat1 = ? AND long1 = ? AND lat2 = ? AND long2 = ?", (lat1, long1, lat2, long2))
+        rows = self.c.fetchall()
+        return rows
+
     def fetch_locations(self, latitude, longitude, radius):
         lat_min = int(latitude) - int(radius)
         lat_max = int(latitude) + int(radius)
@@ -28,8 +34,7 @@ class LocationDatabase:
         self.c.execute('SELECT * FROM test WHERE (' + cond + ')')
         rows = self.c.fetchall()
         return rows
-
-    async def remove_old_data(self):
+    def remove_old_data(self):
         # get all data from database which has been stored for more than 20 day
         self.c.execute("SELECT * FROM test WHERE date < date('now', '-20 day')")
         rows = self.c.fetchall()
@@ -37,6 +42,11 @@ class LocationDatabase:
             self.c.execute("DELETE FROM test WHERE id = ?", (row[0],))
         self.conn.commit()
 
+    def updateAmount(self,id, amount, timestamp):
+        # update amount and timestamp of a specific location id
+        self.c.execute("UPDATE test SET amount = ?, date = ? WHERE id = ?", (amount, timestamp, id))
+        self.conn.commit()
 
+        
     def close(self):
         self.conn.close()
