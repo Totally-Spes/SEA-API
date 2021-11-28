@@ -29,5 +29,14 @@ class LocationDatabase:
         rows = self.c.fetchall()
         return rows
 
+    async def remove_old_data(self):
+        # get all data from database which has been stored for more than 20 day
+        self.c.execute("SELECT * FROM test WHERE date < date('now', '-20 day')")
+        rows = self.c.fetchall()
+        for row in rows:
+            self.c.execute("DELETE FROM test WHERE id = ?", (row[0],))
+        self.conn.commit()
+
+
     def close(self):
         self.conn.close()
