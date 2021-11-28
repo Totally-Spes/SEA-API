@@ -44,3 +44,17 @@ class LoginDatabase():
             return True
         else:
             return False
+        
+        
+    def check_hash(self, email, hash):
+        self.c.execute("SELECT * FROM test WHERE email=?", (email,))
+        rows = self.c.fetchall()
+        return False if not rows else rows[0][3] == hash
+    
+    def get_user_id(self, email):
+        self.c.execute("SELECT * FROM test WHERE email=?", (email,))
+        rows = self.c.fetchall()
+        if len(rows) > 0: 
+            return rows[0][1]
+        else: 
+            return None
