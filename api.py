@@ -38,8 +38,17 @@ class API:
         if not db.check_user(username):
             return "User does not exist"
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
-
     @clear_old
+    def __check_hash(self, username, hash):
+        db = login.LoginDatabase()
+        if db.check_user(username):
+            if db(username, hash):
+                return True
+            else:
+                return False
+        return False
+        
+
     def __edit_user(self, username, hash):
         db = login.LoginDatabase()
         if not db.check_user(username):
@@ -93,7 +102,16 @@ class API:
     @clear_old
     def __login(self, username, hash):
         db = login.LoginDatabase()
-        return jsonify(db.login(username, hash))
+        if db.check_user(username):
+            if db.check_hash(username, hash):
+                print("Login successful")
+                resp = json.dumps({'success':True}), 200, {'ContentType':'application/json',"Access-Control-Allow-Origin": "*"}
+            else:
+                resp = json.dumps({'success':False}), 300, {'ContentType':'application/json',"Access-Control-Allow-Origin": "*"}
+        else:
+            resp = json.dumps({'success':False}), 300, {'ContentType':'application/json',"Access-Control-Allow-Origin": "*"}
+        return resp
+        
 
     def run(self, port):
         self.app.run(debug=True, port=port)
