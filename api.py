@@ -75,12 +75,17 @@ class API:
     @clear_old
     def __set_box(self, lat1, long1, lat2, long2, amount):
         db = location_db.LocationDatabase()
+        date = datetime.datetime.now(timezone.utc).timestamp()
         boxes = db.fetch()
-        for box in boxes:
-            if str(box[2]) == lat1 and str(box[3]) == long1 and str(box[4]) == lat2 and str(box[5]) == long2:
+        for i in range(len(boxes)):
+            box = boxes[i]
+            if str(box[2]) == lat1 and str(box[3]) == long1 and str(box[4]) == lat2 and str(box[5]) == long2: # if the box is already in the database
+                if box[1] != date:
+                    db.updateAmount(i,box[6] + int(amount),date)
+                
                 return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
-        date = datetime.datetime.now(timezone.utc).timestamp()
+   
         db.insert(date, lat1, long1, lat2, long2, amount)
 
         return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
